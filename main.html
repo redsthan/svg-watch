@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Watch</title>
+</head>
+
+<body>
+
+    <svg height="500" width="500">
+        <style>
+            @font-face {
+                font-family: "segment";
+                src: url('./fs-sevegment.ttf');
+            }
+        </style>
+        <!-- Various SVG elements for watch design -->
+        <rect width="30" height="500" x="235" y="0" rx="10" ry="10" transform="rotate(45 250 250)"></rect>
+        <rect width="30" height="500" x="235" y="0" rx="10" ry="10" transform="rotate(-45 250 250)"></rect>
+        <rect width="250" height="500" x="125" y="0" rx="10" ry="10"></rect>
+        <circle id="mainCircle" r="200" cx="250" cy="250" fill="rgb(150,150,150)" stroke="rgb(100,100,100)" stroke-width="35"></circle>
+        <text class="backgray" x="90" y="290" font-family="segment" font-size="90" fill="rgb(140,140,140)" style="user-select: none;">88:88</text>
+        <text class="backgray" x="320" y="290" font-family="segment" font-size="50" fill="rgb(140,140,140)" style="user-select: none;">.88</text>
+        <text id="digitalClock" x="90" y="290" font-family="segment" font-size="90" fill="black" style="user-select: none;">00:00</text>
+        <text id="sec" x="320" y="290" font-family="segment" font-size="50" fill="black" style="user-select: none;">.00</text>
+        <text class="backgray" x="155" y="380" font-family="segment" font-size="30" fill="rgb(140,140,140)" style="user-select: none;">88.88.8888</text>
+        <text id="date" x="155" y="380" font-family="segment" font-size="30" fill="black" style="user-select: none;">00.00.0000</text>
+        <circle onclick="set()" r="50" cx="90" cy="90" fill-opacity="0"></circle>
+        <circle onclick="incr()" r="50" cx="410" cy="90" fill-opacity="0"></circle>
+        <circle onclick="mode()" r="50" cx="90" cy="410" fill-opacity="0"></circle>
+        <circle onclick="light()" r="50" cx="410" cy="410" fill-opacity="0"></circle>
+    </svg>
+
+    <script>
+        var imode = 0; // Variable to track the mode (0 for clock, 1 for chrono)
+        var running = false; // Variable to track if the chrono is running
+        var startTime = 0; // Variable to store the start time of the chrono
+        var elapsedTime = 0; // Variable to store the elapsed time of the chrono
+
+        // Function to start the chrono
+        function startChrono() {
+            startTime = new Date();
+        }
+
+        // Function to reset the chrono
+        function resetChrono() {
+            elapsedTime = 0;
+        }
+
+        // Function to update the chrono display
+        function getChrono() {
+            if (imode === 1) {
+                if (running) {
+                    const now = new Date();
+                    const time = elapsedTime + (now - startTime);
+                    const minutes = String(Math.floor(time / (1000 * 60)) % 100).padStart(2, '0');
+                    const seconds = String(Math.floor((time % (1000 * 60)) / 1000)).padStart(2, '0');
+                    const centi = String(Math.floor((time % 1000) / 10)).padStart(2, '0');
+                    document.getElementById('digitalClock').textContent = `${minutes}:${seconds}`;
+                    document.getElementById('sec').textContent = `.${centi}`;
+                } else {
+                    const minutes = String(Math.floor(elapsedTime / (1000 * 60))).padStart(2, '0');
+                    const seconds = String(Math.floor((elapsedTime % (1000 * 60)) / 1000)).padStart(2, '0');
+                    const centi = String(Math.floor((elapsedTime % 1000) / 10)).padStart(2, '0');
+                    document.getElementById('digitalClock').textContent = `${minutes}:${seconds}`;
+                    document.getElementById('sec').textContent = `.${centi}`;
+                }
+            }
+        }
+
+        // Function to set chrono time to 0
+        function set() {
+            if (imode === 1 && !running) {
+                resetChrono();
+            }
+        }
+
+        // Function to toggle between clock and chrono modes
+        function mode() {
+            imode += 1;
+            imode %= 2;
+        }
+
+        // Function to start/stop the chrono
+        function incr() {
+            if (imode === 1) {
+                if (!running) {
+                    startChrono();
+                    running = true;
+                } else {
+                    const now = new Date();
+                    elapsedTime = elapsedTime + (now - startTime);
+                    running = false;
+                }
+            }
+        }
+
+        // Function to change color and revert after 5 seconds
+        function light() {
+            document.getElementById('mainCircle').setAttribute('fill', 'rgb(0,200,200)');
+            var elements = document.getElementsByClassName('backgray');
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].setAttribute('fill', 'rgb(0,170,170)');
+            }
+
+            setTimeout(function() {
+                document.getElementById('mainCircle').setAttribute('fill', 'rgb(150,150,150)');
+                var elements = document.getElementsByClassName('backgray');
+                for (var i = 0; i < elements.length; i++) {
+                    elements[i].setAttribute('fill', 'rgb(140,140,140)');
+                }
+            }, 5000);
+        }
+
+        // Function to update clock display
+        function updateClock() {
+            if (imode === 0) {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const sec = String(now.getSeconds()).padStart(2, '0');
+
+                document.getElementById('digitalClock').textContent = `${hours}:${minutes}`;
+                document.getElementById('sec').textContent = `.${sec}`;
+            }
+        }
+
+        // Function to update date display
+        function updateDate() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            document.getElementById('date').textContent = `${day}.${month}.${year}`;
+        }
+
+        // Set intervals for continuous updates
+        setInterval(updateClock, 200);
+        setInterval(getChrono, 10);
+        setInterval(updateDate, 1000);
+
+        // Initial calls to update functions
+        updateClock();
+        updateDate();
+        getChrono();
+    </script>
+
+</body>
+
+</html>
