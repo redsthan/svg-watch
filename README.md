@@ -39,8 +39,7 @@ Simply open the `index.html` file in a web browser to view and interact with the
 ## Functionality
 
 - **Digital Clock:**
-  - Displays the current time in HH:mm format.
-  - Seconds are displayed in a separate area.
+  - Displays the current time in HH:mm.ss format.
 
 - **Date:**
   - Displays the current date in DD.MM.YYYY format.
